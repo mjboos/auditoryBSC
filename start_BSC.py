@@ -40,7 +40,7 @@ parser.add_argument('--n_anneal',default = n_anneal,type = int)
 parser.add_argument('--N_cut',default = N_cut,type = list_of_tuples)
 #parser.add_argument('--W_noise',default = W_noise,type = list_of_tuples)
 parser.add_argument('--T',default = T,type = list_of_tuples)
-parser.add_argument('--data',default = max(glob.glob('/home/mboos/MasterThesis/data/preprocessed/*.h5'),key=os.path.getctime).split('/')[-1],type = augment_filename, nargs = '*')
+parser.add_argument('--data',default = max(glob.glob('/home/mboos/MasterThesis/data/preprocessed/*.pkl'),key=os.path.getctime).split('/')[-1],type = augment_filename, nargs = '*')
 parser.add_argument('--name',default = 'model@' + strftime("%H:%M:%S"), type = str)
 parser.add_argument('--parallel', default = 1, type = int)
 
@@ -48,7 +48,6 @@ parser.add_argument('--parallel', default = 1, type = int)
 arg_namespace = vars(parser.parse_args())
 
 parallel = arg_namespace.pop('parallel')
-
 
 common_dict = {key:value for key,value in arg_namespace.iteritems() if key in ['T', 'N_cut']}
 
@@ -71,7 +70,10 @@ if len(common_dict) == len(arg_namespace):
         fh.write(yaml.dump(arg_namespace))
 
     with open(log_fn,'w+') as fh:
-        subprocess.Popen(['nohup','python','analyze_BSC.py',arg_namespace['data'],model_spec_fn,arg_namespace['name']],stdout=fh)
+        if parallel > 1:
+            subprocess.Popen(['nohup','mpiexec','-n',str(parallel),'python','analyze_BSC_mpi.py',arg_namespace['data'],model_spec_fn,arg_namespace['name']],stdout=fh)
+        else:
+            subprocess.Popen(['nohup','python','analyze_BSC.py',arg_namespace['data'],model_spec_fn,arg_namespace['name']],stdout=fh)
 
     print('Job started!')
 else:
@@ -97,6 +99,10 @@ else:
             fh.write(yaml.dump(model_dict))
 
         with open(log_fn,'w+') as fh:
-            subprocess.Popen(['nohup','python','analyze_BSC.py',model_dict['data'],model_spec_fn,model_dict['name']],stdout=fh)
+            if parallel > 1:
+                subprocess.Popen(['nohup','mpiexec','-n',str(parallel),'python','analyze_BSC_mpi.py',model_dict['data'],model_spec_fn,model_dict['name']],stdout=fh)
+            else:
+                subprocess.Popen(['nohup','python','analyze_BSC.py',model_dict['data'],model_spec_fn,model_dict['name']],stdout=fh)
+
 
         print('Job started!')

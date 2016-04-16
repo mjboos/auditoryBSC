@@ -33,8 +33,8 @@ patches = joblib.load(data_file)['data']
 with open(model_file,'r') as model_fh:
     model_spec = yaml.load(model_fh)
 
-H, Hprime, gamma, n_anneal, Ncut, Wnoise, T = [model_spec[key] for key in ['H','Hprime','gamma', 'n_anneal',
-                                                                'N_cut', 'W_noise', 'T']] 
+H, Hprime, gamma, n_anneal, Ncut, T = [model_spec[key] for key in ['H','Hprime','gamma', 'n_anneal',
+                                                                'N_cut', 'T']] 
 
 N = patches.shape[0]
 D = patches.shape[1]

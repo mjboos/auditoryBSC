@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import glob
 from sklearn.feature_extraction.image import extract_patches_2d
+from sklearn.preprocessing import StandardScaler
 import sys
 
 folder, patchwidth, patchheight = sys.argv[1:]
@@ -44,9 +45,4 @@ movie = reduce(cut_out_overlap,movie)
 
 movie_patches = extract_patches_2d(movie,patchsize)
 
-
-#delete non-speech parts
-speech = np.concatenate([ movie_patches[spt[0]:spt[1]] for spt in speech_arr])
-
-
-joblib.dump(speech,'data/speech_patches.pkl')
+joblib.dump(movie_patches,'data/all_patches.pkl')

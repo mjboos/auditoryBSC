@@ -25,22 +25,24 @@ plt.rcParams['image.cmap'] = 'viridis'
 
 data_file, model_file, job_name = sys.argv[1:]
 
-with tables.openFile(data_file,'r') as data_h5:
-	N_all = data_h5.root.y.shape[1]
-	first_y, last_y = stride_data(N_all)
-	patches = data_h5.root.y[0][first_y:last_y]
-	data_h5.close()
-	
-
-#patches = joblib.load(data_file)['data']
+comm = MPI.COMM_WORLD
+comm.Barrier()
+pprint("=" * 40)
+pprint(" Running %d parallel processes" % comm.size)
+pprint("=" * 40)
 
 
+data = joblib.load(data_file,mmap_mode='r')
+N_all = data['data'].shape[0] - (data['data'].shape[0] % comm.size)
+first_y, last_y = stride_data(N_all)
+patches = np.array(data['data'][first_y:last_y])
+del(data)
 
 with open(model_file,'r') as model_fh:
     model_spec = yaml.load(model_fh)
 
-H, Hprime, gamma, n_anneal, Ncut, Wnoise, T = [model_spec[key] for key in ['H','Hprime','gamma', 'n_anneal',
-                                                                'N_cut', 'W_noise', 'T']] 
+H, Hprime, gamma, n_anneal, Ncut, T = [model_spec[key] for key in ['H','Hprime','gamma', 'n_anneal',
+                                                                'N_cut', 'T']] 
 
 N = patches.shape[0]
 D = patches.shape[1]

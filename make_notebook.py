@@ -12,7 +12,7 @@ with open(nbfn) as f:
 nb['cells'][0]['source'] = u'# {} model visualisation'.format(model_name)
 nb['cells'][2]['source'] = nb['cells'][2]['source'].replace('generic_model',model_name)
 
-ep = ExecutePreprocessor(timeout=600,kernel_name='python2')
+ep = ExecutePreprocessor(timeout=1800,kernel_name='python2')
 
 ep.preprocess(nb,{})
 
